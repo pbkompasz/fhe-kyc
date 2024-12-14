@@ -6,26 +6,30 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy, getOrNull } = hre.deployments;
 
   // Check if contract was previously deployed
-  const existingDeployment = await getOrNull("MyConfidentialERC20");
-  const isNewDeployment = !existingDeployment;
+  const isNewMulticall = !(await getOrNull("Multicall"));
+  const isNewStorage = !(await getOrNull("Storage"));
+  const isNewRegistry = !(await getOrNull("Registry"));
 
-  const deployed = await deploy("MyConfidentialERC20", {
+  const deployedMulticall = await deploy("Multicall", {
     from: deployer,
-    args: ["Naraggara", "NARA"],
+    args: [],
     log: true,
   });
 
-  console.log(`MyConfidentialERC20 contract: `, deployed.address);
-  if (isNewDeployment) {
-    const signers = await hre.ethers.getSigners();
-    const alice = signers[0];
-    const mintAmount = 10_000n;
-    const tokenFactory = await hre.ethers.getContractFactory("MyConfidentialERC20");
-    const token = tokenFactory.attach(deployed.address);
-    const mintTx = await token.mint(alice, mintAmount);
-    await mintTx.wait();
-    console.log(`Alice minted ${mintAmount} tokens to herself`);
-  }
+  const deployedStorage = await deploy("Storage", {
+    from: deployer,
+    args: [],
+    log: true,
+  });
+  const deployedRegistry = await deploy("Registry", {
+    from: deployer,
+    args: [deployedStorage.address],
+    log: true,
+  });
+
+  console.log(`Multicall contract: `, deployedMulticall.address);
+  console.log(`Storage contract: `, deployedStorage.address);
+  console.log(`Registry contract: `, deployedRegistry.address);
 };
 export default func;
 func.id = "deploy_confidentialERC20"; // id required to prevent reexecution
