@@ -43,9 +43,9 @@ The feed is essentially is a middleware that takes a feed's output and reorganiz
 
 ## TODOs
 
-[ ] Move the Storage to ipfs  
-[ ] Add account abstraction w/ platforms as paymasters
-[ ] Feed
+- [ ] Move the Storage to ipfs  
+- [ ] Add account abstraction w/ platforms as paymasters  
+- [ ] Feed
 
 ### How to deploy on Sepolia
 
