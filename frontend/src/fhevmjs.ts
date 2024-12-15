@@ -43,6 +43,7 @@ let instance: FhevmInstance;
 const keypairs: Keypairs = {};
 
 export const createFhevmInstance = async () => {
+  console.log('creating')
   if (instancePromise) return instancePromise;
   const storedPublicKey = await getPublicKey(ACL_ADDRESS);
   const publicKey = storedPublicKey?.publicKey;
@@ -53,6 +54,7 @@ export const createFhevmInstance = async () => {
         '2048': storedPublicParams,
       }
     : null;
+  console.log('creating...')
   instancePromise = createInstance({
     network: window.ethereum,
     aclContractAddress: ACL_ADDRESS,
@@ -64,6 +66,7 @@ export const createFhevmInstance = async () => {
   });
   instance = await instancePromise;
   const pp = instance.getPublicParams(2048);
+  console.log('creating...')
   if (pp) {
     await storePublicParams(ACL_ADDRESS, pp);
   }
@@ -71,6 +74,7 @@ export const createFhevmInstance = async () => {
   if (pk) {
     await storePublicKey(ACL_ADDRESS, pk);
   }
+  console.log('created')
 };
 
 export const setKeypair = (

@@ -34,28 +34,29 @@ export const Devnet = ({ account, provider }: DevnetProps) => {
   const [decryptedSecret, setDecryptedResult] = useState('???');
   const [counter, setCounter] = useState(0); // useful trick to make the refresh of decryption state work, otherwise contract call will not work correctly (because provider's state won't be updated without a React re-rendering)
 
+  console.log('here')
   useEffect(() => {
     const loadData = async () => {
       try {
         // Conditional import based on MOCKED environment variable
-        let MyConfidentialERC20;
+        let registry;
         if (!import.meta.env.MOCKED) {
-          MyConfidentialERC20 = await import(
-            '@deployments/sepolia/MyConfidentialERC20.json'
+          registry = await import(
+            '@deployments/sepolia/Registry.json'
           );
           console.log(
-            `Using ${MyConfidentialERC20.address} for the token address on Sepolia`,
+            `Using ${registry.address} for the token address on Sepolia`,
           );
         } else {
-          MyConfidentialERC20 = await import(
-            '@deployments/localhost/MyConfidentialERC20.json'
+          registry = await import(
+            '@deployments/sepolia/Registry.json'
           );
           console.log(
-            `Using ${MyConfidentialERC20.address} for the token address on Hardhat Local Node`,
+            `Using ${registry.address} for the token address on Hardhat Local Node`,
           );
         }
 
-        setContractAddress(MyConfidentialERC20.address);
+        setContractAddress(registry.address);
       } catch (error) {
         console.error(
           'Error loading data - you probably forgot to deploy the token contract before running the front-end server:',
@@ -67,123 +68,124 @@ export const Devnet = ({ account, provider }: DevnetProps) => {
     loadData();
   }, []);
 
-  const handleConfirmAmount = () => {
-    setChosenValue(inputValue);
-  };
+  // const handleConfirmAmount = () => {
+  //   setChosenValue(inputValue);
+  // };
 
-  const handleConfirmAddress = () => {
-    const trimmedValue = inputValueAddress.trim().toLowerCase();
-    if (ethers.isAddress(trimmedValue)) {
-      // getAddress returns the checksummed address
-      const checksummedAddress = ethers.getAddress(trimmedValue);
-      setChosenAddress(checksummedAddress);
-      setErrorMessage('');
-    } else {
-      setChosenAddress('0x');
-      setErrorMessage('Invalid Ethereum address.');
-    }
-  };
+  // const handleConfirmAddress = () => {
+  //   const trimmedValue = inputValueAddress.trim().toLowerCase();
+  //   if (ethers.isAddress(trimmedValue)) {
+  //     // getAddress returns the checksummed address
+  //     const checksummedAddress = ethers.getAddress(trimmedValue);
+  //     setChosenAddress(checksummedAddress);
+  //     setErrorMessage('');
+  //   } else {
+  //     setChosenAddress('0x');
+  //     setErrorMessage('Invalid Ethereum address.');
+  //   }
+  // };
 
-  const instance = getInstance();
+  // const instance = getInstance();
 
-  const getHandleBalance = async () => {
-    if (contractAddress != ZeroAddress) {
-      const contract = new ethers.Contract(
-        contractAddress,
-        ['function balanceOf(address) view returns (uint256)'],
-        provider,
-      );
-      const handleBalance = await contract.balanceOf(account);
-      setHandleBalance(handleBalance.toString());
-      setDecryptedBalance('???');
-    }
-  };
+  // const getHandleBalance = async () => {
+  //   if (contractAddress != ZeroAddress) {
+  //     const contract = new ethers.Contract(
+  //       contractAddress,
+  //       ['function balanceOf(address) view returns (uint256)'],
+  //       provider,
+  //     );
+  //     const handleBalance = await contract.balanceOf(account);
+  //     setHandleBalance(handleBalance.toString());
+  //     setDecryptedBalance('???');
+  //   }
+  // };
 
-  useEffect(() => {
-    getHandleBalance();
-  }, [account, provider, contractAddress]);
+  // useEffect(() => {
+  //   getHandleBalance();
+  // }, [account, provider, contractAddress]);
 
-  const encrypt = async (val: bigint) => {
-    const now = Date.now();
-    try {
-      const result = await instance
-        .createEncryptedInput(contractAddress, account)
-        .add64(val)
-        .encrypt();
-      console.log(`Took ${(Date.now() - now) / 1000}s`);
-      setHandles(result.handles);
-      setEncryption(result.inputProof);
-    } catch (e) {
-      console.error('Encryption error:', e);
-      console.log(Date.now() - now);
-    }
-  };
+  // const encrypt = async (val: bigint) => {
+  //   const now = Date.now();
+  //   try {
+  //     const result = await instance
+  //       .createEncryptedInput(contractAddress, account)
+  //       .add64(val)
+  //       .encrypt();
+  //     console.log(`Took ${(Date.now() - now) / 1000}s`);
+  //     setHandles(result.handles);
+  //     setEncryption(result.inputProof);
+  //   } catch (e) {
+  //     console.error('Encryption error:', e);
+  //     console.log(Date.now() - now);
+  //   }
+  // };
 
-  const decrypt = async () => {
-    const signer = await provider.getSigner();
-    try {
-      const clearBalance = await reencryptEuint64(
-        signer,
-        instance,
-        BigInt(handleBalance),
-        contractAddress,
-      );
-      setDecryptedBalance(clearBalance.toString());
-    } catch (error) {
-      if (error === 'Handle is not initialized') {
-        // if handle is uninitialized - i.e equal to 0 - we know for sure that the balance is null
-        setDecryptedBalance('0');
-      } else {
-        throw error;
-      }
-    }
-  };
+  // const decrypt = async () => {
+  //   const signer = await provider.getSigner();
+  //   try {
+  //     const clearBalance = await reencryptEuint64(
+  //       signer,
+  //       instance,
+  //       BigInt(handleBalance),
+  //       contractAddress,
+  //     );
+  //     setDecryptedBalance(clearBalance.toString());
+  //   } catch (error) {
+  //     if (error === 'Handle is not initialized') {
+  //       // if handle is uninitialized - i.e equal to 0 - we know for sure that the balance is null
+  //       setDecryptedBalance('0');
+  //     } else {
+  //       throw error;
+  //     }
+  //   }
+  // };
 
-  const transferToken = async () => {
-    const contract = new ethers.Contract(
-      contractAddress,
-      ['function transfer(address,bytes32,bytes) external returns (bool)'],
-      provider,
-    );
-    const signer = await provider.getSigner();
-    const tx = await contract
-      .connect(signer)
-      .transfer(
-        chosenAddress,
-        toHexString(handles[0]),
-        toHexString(encryption),
-      );
-    await tx.wait();
-    await getHandleBalance();
-  };
+  // const transferToken = async () => {
+  //   const contract = new ethers.Contract(
+  //     contractAddress,
+  //     ['function transfer(address,bytes32,bytes) external returns (bool)'],
+  //     provider,
+  //   );
+  //   const signer = await provider.getSigner();
+  //   const tx = await contract
+  //     .connect(signer)
+  //     .transfer(
+  //       chosenAddress,
+  //       toHexString(handles[0]),
+  //       toHexString(encryption),
+  //     );
+  //   await tx.wait();
+  //   await getHandleBalance();
+  // };
 
-  const decryptSecret = async () => {
-    const contract = new ethers.Contract(
-      contractAddress,
-      ['function requestSecret() external'],
-      provider,
-    );
-    const signer = await provider.getSigner();
-    const tx = await contract.connect(signer).requestSecret();
-    await tx.wait();
-  };
+  // const decryptSecret = async () => {
+  //   const contract = new ethers.Contract(
+  //     contractAddress,
+  //     ['function requestSecret() external'],
+  //     provider,
+  //   );
+  //   const signer = await provider.getSigner();
+  //   const tx = await contract.connect(signer).requestSecret();
+  //   await tx.wait();
+  // };
 
-  const refreshSecret = async () => {
-    setCounter(counter + 1);
-    const contract = new ethers.Contract(
-      contractAddress,
-      ['function revealedSecret() view returns(uint64)'],
-      provider,
-    );
-    const revealedSecret = await contract.revealedSecret();
-    const revealedSecretString =
-      revealedSecret === 0n ? '???' : revealedSecret.toString();
-    setDecryptedResult(revealedSecretString);
-  };
+  // const refreshSecret = async () => {
+  //   setCounter(counter + 1);
+  //   const contract = new ethers.Contract(
+  //     contractAddress,
+  //     ['function revealedSecret() view returns(uint64)'],
+  //     provider,
+  //   );
+  //   const revealedSecret = await contract.revealedSecret();
+  //   const revealedSecretString =
+  //     revealedSecret === 0n ? '???' : revealedSecret.toString();
+  //   setDecryptedResult(revealedSecretString);
+  // };
 
   return (
     <div>
-      <dl>
+      asd
+      {/* <dl>
         <dt className="Devnet__title">My encrypted balance is:</dt>
         <dd className="Devnet__dd">{handleBalance.toString()}</dd>
 
@@ -270,7 +272,7 @@ export const Devnet = ({ account, provider }: DevnetProps) => {
             </button>
           </dd>
         </div>
-      </dl>
+      </dl> */}
     </div>
   );
 };

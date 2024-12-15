@@ -29,22 +29,24 @@ function App() {
     // do something with event data
   };
 
+  const [showWebcam, setShowWebcam] = useState(false);
+
   const webcamRef = useRef(null);
 
   const capture = () => {
     const imageSrc = webcamRef.current.getScreenshot();
-    console.log(imageSrc); // Send this to the backend for verification
+    console.log(imageSrc);
   };
 
   return (
     <>
-      <h1>KYC</h1>
-      <p>Prove your identity(this may incurre extra costs)</p>
       <Connect>
         {(account, provider) => (
           <Devnet account={account} provider={provider} />
         )}
       </Connect>
+      <h1>KYC</h1>
+      <p>Prove your identity(this may incurre extra costs)</p>
       <p>- OR -</p>
       <p>Prove your identity for a platform</p>
       <div style={{ border: '1px solid grey', padding: '1rem' }}>
@@ -55,6 +57,7 @@ function App() {
               backgroundColor: 'grey',
               padding: '0.5rem',
               borderRadius: '10px',
+              maxWidth: '200px',
             }}
           >
             {provider.isAuthenticated ? (
@@ -65,14 +68,13 @@ function App() {
               </button>
             )}
             {provider.isSponsored && (
-              <p>This provider can sponsor the process</p>
+              <p>This platform sponsors the process</p>
             )}
           </div>
         ))}
       </div>
       <div>
-        <h2>Basic identity verification</h2>- Full name, - date of birth -
-        gender - nationality - Twitter(currently X) profile verification
+        <h2>Basic identity verification</h2>
         <div>
           <label htmlFor="fname">First name:</label>
           <input type="text" id="fname" name="fname" />
@@ -104,28 +106,52 @@ function App() {
           />
         </div>
         <h2>Identity Proof w/ Government-Issued ID</h2>
-        <div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '2rem',
+          }}
+        >
           {/* NOTE This will only extract data from image */}
-          <button onClick={() => fileInputRef.current.click()}>
-            Upload your id
-          </button>
-          <input
-            onChange={handleChange}
-            multiple={false}
-            ref={fileInputRef}
-            type="file"
-            hidden
-          />
-        </div>
-        {/* NOTE Display not available yet */}
-        <div>
-          <button disabled>Scan your passport or ID</button>
+          <div>
+            <button onClick={() => fileInputRef.current.click()}>
+              Upload your id
+            </button>
+            <input
+              onChange={handleChange}
+              multiple={false}
+              ref={fileInputRef}
+              type="file"
+              hidden
+            />
+          </div>
+          <div>
+            <button disabled>Scan your passport or ID</button>
+          </div>
         </div>
         <h2>Selfie Verification</h2>
-        <div>
-          <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" />
-          <button onClick={capture}>Capture Selfie</button>
-        </div>
+        {showWebcam ? (
+          <div>
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/jpeg"
+            />
+            <button onClick={capture}>Capture Selfie</button>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              console.log('here');
+              setShowWebcam(true);
+            }}
+          >
+            Start
+          </button>
+        )}
       </div>
     </>
   );
