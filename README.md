@@ -1,33 +1,51 @@
-# fhe-kyc
+# FHEed
 
 This project has been submitted to Aleph de Verano Hackathon's Building the future with FHE bounty.
 
+FHEed is a proof of humanity platform and serves as a foundation for selective disclosures.
+
 ## General architecture
 
-## Smart Contract Architecture
-
-General - Every user has a unique hash that is created on clients or keccak if it works
-KYC Strategy
-Verification
-Paymaster - Sponsored by a PDS, where every user is entitled to an account verification
-Multicall - To fetch
+![scenario](img/scenario.png)
 
 ## KYC
 
-Supported criterias:
+### Strategies
 
 - Basic identity verification:
+
   - Full name,
-  - date of birth
-  - gender
-  - nationality
-- Twitter(currently X) profile verification
+  - Date of birth
+  - Gender
+  - Nationality
+
 - Identity Proof w/ Government-Issued ID
+
+  Extract metadata from Machine Readable Zone of passports and IDs.  
+  Furthermore, existing tools like OpenPassport can generate ZK proofs on user's passports and goverment IDs. This workflow can be integrated to further strengthen the KYC process.
+
 - Selfie Verification
-  Optimistic verification
-  Proof of execution. Under development
+
+  Users can submit a selfie and verify their personhood.  
+  An encrypted version of the selfie is submitted to the Storage contract. This image can be checked by third-parties for validity with ConcreteML.
+
+These verification processes work in an "optimistic" model, the initial verification happens on the client side and the encrypted data and the results are uploaded to the smart contract. The feed or other service that wants to use the service can download the encrypted data and challenge their validity with tools like ConcreteML. This works similarly to fault-prover where any user can challenge a proposal made by other users.  
+This can be improved by creating proof of executions for each strategy, see [Greco](https://eprint.iacr.org/2024/594.pdf).
 
 ## The FHEed
+
+The feed is essentially is a middleware that takes a feed's output and reorganizes it favouring users that have been verified.
+`feed` contains a proof-of-concept feed, it is essentially a following feed w/ the following structure:
+
+- posts of verified users
+- a post marking the breakpoint between posts by verified and unverified users
+- posts by unverified users
+
+## TODOs
+
+[ ] Move the Storage to ipfs  
+[ ] Add account abstraction w/ platforms as paymasters
+[ ] Feed
 
 ### How to deploy on Sepolia
 
