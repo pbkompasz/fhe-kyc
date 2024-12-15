@@ -46,7 +46,7 @@ contract KYC is IKYC, Ownable {
         return address(strategies[index]);
     }
 
-    function link(uint256 accountId, bytes memory accountProof) public onlyOwner returns (bool, uint) {
+    function linkAccount(uint sponsorPlatform, bytes memory accountProof) public onlyOwner returns (bool, uint) {
         // Validate proof
         // Get KYC item
         // Link account

@@ -5,6 +5,6 @@ interface IStrategy {
     // Get the instructions and data to run the verification
     function verify() external returns (string memory, bytes memory);
     // Submit the result
-    function submitResult(bool) external;
+    function submitResult(bool) external payable;
     function isVerified() external view returns (bool);
 }

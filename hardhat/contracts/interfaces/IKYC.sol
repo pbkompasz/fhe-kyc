@@ -3,5 +3,5 @@
 pragma solidity ^0.8.24;
 
 interface IKYC {
-    
+    function linkAccount(uint sponsorPlatform, bytes memory accountProof) external returns (bool, uint);
 }
